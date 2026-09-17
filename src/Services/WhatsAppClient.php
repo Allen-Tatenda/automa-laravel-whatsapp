@@ -1,71 +1,27 @@
 <?php
-
 namespace Automa\WhatsApp\Services;
-
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
-
 class WhatsAppClient
 {
-    protected string $baseUrl;
-
-    protected string $apiVersion;
-
-    protected string $accessToken;
-
-    protected string $phoneNumberId;
-
-    public function __construct()
+    public function __construct(protected ?string $token = null) { $this->token ??= config('whatsapp.access_token'); }
+    protected function graph(string $path): string { return rtrim(config('whatsapp.base_url'), '/').'/'.trim(config('whatsapp.api_version'), '/').'/'.ltrim($path, '/'); }
+    public function request(string $method, string $path, array $data = [], array $headers = []): Response
     {
-        $this->baseUrl = config('whatsapp.base_url');
-
-        $this->apiVersion = config(
-            'whatsapp.api_version'
-        );
-
-        $this->accessToken = config(
-            'whatsapp.access_token'
-        );
-
-        $this->phoneNumberId = config(
-            'whatsapp.phone_number_id'
-        );
-    }
-
-    protected function url(string $endpoint): string
-    {
-        return sprintf(
-            '%s/%s/%s/%s',
-            $this->baseUrl,
-            $this->apiVersion,
-            $this->phoneNumberId,
-            ltrim($endpoint, '/')
-        );
-    }
-
-    public function post(
-        string $endpoint,
-        array $data
-    ): Response {
-        $response = Http::withToken(
-            $this->accessToken
-        )->acceptJson()->post(
-            $this->url($endpoint),
-            $data
-        );
-
-        if ($response->failed()) {
-            throw new RuntimeException(
-                'WhatsApp API error: '.$response->body()
-            );
-        }
-
+        $http = Http::withToken($this->token)->acceptJson()->withHeaders($headers);
+        $response = $http->$method($this->graph($path), $data);
+        if ($response->failed()) throw new RuntimeException('WhatsApp API error: '.$response->body(), $response->status());
         return $response;
     }
-
-    public function sendMessage(array $message): Response
+    public function send(string $payload): Response { return $this->request('post', config('whatsapp.phone_number_id').'/messages', json_decode($payload, true) ?: []); }
+    public function sendMessage(array $payload): Response { return $this->request('post', config('whatsapp.phone_number_id').'/messages', $payload); }
+    public function uploadMedia(string $path, string $mime): Response
     {
-        return $this->post('messages', $message);
+        $url = $this->graph(config('whatsapp.phone_number_id').'/media');
+        $response = Http::withToken($this->token)->attach('file', fopen($path, 'r'), basename($path))->post($url, ['messaging_product' => 'whatsapp', 'type' => $mime]);
+        if ($response->failed()) throw new RuntimeException('WhatsApp media upload error: '.$response->body(), $response->status());
+        return $response;
     }
+    public function get(string $path, array $query = []): Response { return Http::withToken($this->token)->acceptJson()->get($this->graph($path), $query); }
 }

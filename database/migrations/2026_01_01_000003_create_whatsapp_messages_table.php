@@ -1,0 +1,3 @@
+<?php
+use Illuminate\Database\Migrations\Migration; use Illuminate\Database\Schema\Blueprint; use Illuminate\Support\Facades\Schema;
+return new class extends Migration { public function up(){ Schema::create('whatsapp_messages',function(Blueprint $t){$t->id();$t->string('wamid')->nullable()->unique();$t->foreignId('contact_id')->constrained('whatsapp_contacts')->cascadeOnDelete();$t->foreignId('conversation_id')->constrained('whatsapp_conversations')->cascadeOnDelete();$t->string('direction')->index();$t->string('type');$t->text('text')->nullable();$t->string('status')->nullable();$t->json('payload');$t->timestamp('sent_at')->nullable();$t->timestamps();$t->index(['conversation_id','created_at']);}); } public function down(){Schema::dropIfExists('whatsapp_messages');} };
