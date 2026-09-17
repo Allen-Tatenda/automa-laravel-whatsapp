@@ -1,0 +1,39 @@
+{
+    "name": "automa/laravel-whatsapp",
+    "description": "Laravel WhatsApp Cloud API chatbot automation package",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "php": "^8.2",
+        "illuminate/support": "^11.0|^12.0|^13.0",
+        "illuminate/http": "^11.0|^12.0|^13.0",
+        "illuminate/database": "^11.0|^12.0|^13.0",
+        "illuminate/console": "^11.0|^12.0|^13.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^9.0|^10.0|^11.0",
+        "phpunit/phpunit": "^11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Automa\\WhatsApp\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Automa\\WhatsApp\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Automa\\WhatsApp\\WhatsAppServiceProvider"
+            ],
+            "aliases": {
+                "WhatsApp": "Automa\\WhatsApp\\Facades\\WhatsApp"
+            }
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
