@@ -100,7 +100,3 @@ If `WHATSAPP_APP_SECRET` is configured, POST webhooks are checked against `X-Hub
 composer install
 vendor/bin/phpunit
 ```
-
-## Publishing
-
-Push this repository to GitHub/GitLab, create a tagged release, and register `automa/laravel-whatsapp` on Packagist. Consumers can then install it with `composer require automa/laravel-whatsapp`.
